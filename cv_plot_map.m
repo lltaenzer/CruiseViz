@@ -1,4 +1,4 @@
-function [ax,c] = plot_map(trans,str_title,bathy)
+function [ax,c] = cv_plot_map(trans,str_title,bathy)
     % PLOT_MAP Plots a lat/lon-map of transect with bathymetry
     % (plotting function)
     %
@@ -10,6 +10,7 @@ function [ax,c] = plot_map(trans,str_title,bathy)
     %                       bathy.LON   = 2D Longitude array [degE]
     %                       bathy.LAT   = 2D Latitude array [degE]
     %                       bathy.depth = 2D ocean depth array [m]
+    %
     % OUTPUT:
     %   ax = MATLAB axes of map
     %   c  = colorbar structure of map
@@ -20,7 +21,7 @@ function [ax,c] = plot_map(trans,str_title,bathy)
     % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
+    % Last updated: 2026-08-06
 
     colorscheme = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840]};
     % color:            blue                 red                     yellow                purple                  green               light blue               dark red
@@ -64,7 +65,7 @@ function [ax,c] = plot_map(trans,str_title,bathy)
     % Identify subset of bathy-grid needed for plot
     nx = [1 1 2 2]; ny = [1 2 1 2]; [Lx,Ly] = size(bathy.depth);
     for j=1:4
-        [nx(j),ny(j)] = nearestneighbor2D(bathy,yL(ny(j)),xL(nx(j)));
+        [nx(j),ny(j)] = cv_nearestneighbor2D(bathy,yL(ny(j)),xL(nx(j)));
     end
     nx(nx==1) = 2; nx(nx==Lx) = Lx-1; % move away from bathy-boundaries
     ny(ny==1) = 2; ny(ny==Ly) = Ly-1;
@@ -81,7 +82,7 @@ function [ax,c] = plot_map(trans,str_title,bathy)
     scatter(lon,lat,25,'o','filled','MarkerFaceColor',colorscheme{2},'MarkerEdgeColor','k') % CTD stations
     text(lon,lat,strcat(" ",strip(station_str,'left','0')),'FontSize',12,'Color',colorscheme{2},'Clipping','on')
     
-    %plot_distance_markers(xL,yL);
+    %cv_plot_distance_markers(xL,yL);
 
     cmocean('deep',15); %cL = clim; cL(1)=0; clim(cL); 
     xlim(xL); ylim(yL);

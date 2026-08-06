@@ -1,4 +1,4 @@
-function station_str = station_string(station)
+function station_str = cv_station_string(station)
     % STATION_STR Create string array for naming stations by only listing 
     %             stations when station order is not a simple sequence,
     %             e.g., to avoid overlap when plotting transects
@@ -10,13 +10,10 @@ function station_str = station_string(station)
     % OUTPUT:
     %   station_str = 1D cell array listing station string names of
     %                 transect as they should appear in transect plots
-    %
-    % SEE ALSO:
-    %   plot_transect.m
     % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
+    % Last updated: 2026-08-06
 
     % Set up arrays
     station_str        = station;

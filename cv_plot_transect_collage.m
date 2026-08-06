@@ -1,4 +1,4 @@
-function plot_transect_collage(trans,str_title,str_vari,bathy)
+function cv_plot_transect_collage(trans,str_title,str_vari,bathy)
     % PLOT_TRANSECT_COLLAGE Plots collection of transects for first-order analysis 
     %                       aboard the ship
     % (plotting function)
@@ -49,10 +49,7 @@ function plot_transect_collage(trans,str_title,str_vari,bathy)
     % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
-
-    colorscheme = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840]};
-    % color:            blue                 red                     yellow                purple                  green               light blue               dark red
+    % Last updated: 2026-08-06
 
     % Ensure that fields follow naming convention
     variab_str = fieldnames(trans);
@@ -97,8 +94,8 @@ function plot_transect_collage(trans,str_title,str_vari,bathy)
     col.str_vari = strcat(str_anom,'\Theta_0 [°C]');
     col.cL       = trans.theta0_cbar(1:2);
     col.Ncol     = trans.theta0_cbar(3);
-    [ax,~] = plot_transect(trans.dist,trans.pres,trans.theta0,trans.sigmatheta,...
-                           trans.depth,trans.pres_max,trans.ctd.dist,trans.ctd.station,[],[],col);
+    [ax,~] = cv_plot_transect(trans.dist,trans.pres,trans.theta0,trans.sigmatheta,...
+                              trans.depth,trans.pres_max,trans.ctd.dist,trans.ctd.station,[],[],col);
     set(ax,'Position',get(ax,'Position')+[-0.03 0 0.05 0])
     ax.FontSize = 12;
 
@@ -108,8 +105,8 @@ function plot_transect_collage(trans,str_title,str_vari,bathy)
     col.str_vari = strcat(str_anom,'S [g kg^{-1}]');
     col.cL       = trans.salt_cbar(1:2);
     col.Ncol     = trans.salt_cbar(3);
-    [ax,~] = plot_transect(trans.dist,trans.pres,trans.salt,trans.sigmatheta,...
-                           trans.depth,trans.pres_max,trans.ctd.dist,trans.ctd.station,[],[],col);
+    [ax,~] = cv_plot_transect(trans.dist,trans.pres,trans.salt,trans.sigmatheta,...
+                              trans.depth,trans.pres_max,trans.ctd.dist,trans.ctd.station,[],[],col);
     set(ax,'Position',get(ax,'Position')+[-0.03 0 0.05 0])
     ax.FontSize = 12;
 
@@ -119,8 +116,8 @@ function plot_transect_collage(trans,str_title,str_vari,bathy)
     col.str_vari = strcat(str_anom,str_vari.long);
     col.cL       = trans.vari_cbar(1:2);
     col.Ncol     = trans.vari_cbar(3);
-    [ax,~] = plot_transect(trans.dist,trans.pres,trans.(str_vari.short),trans.sigmatheta,...
-                           trans.depth,trans.pres_max,trans.ctd.dist,trans.ctd.station,[],'Distance [km]',col);
+    [ax,~] = cv_plot_transect(trans.dist,trans.pres,trans.(str_vari.short),trans.sigmatheta,...
+                              trans.depth,trans.pres_max,trans.ctd.dist,trans.ctd.station,[],'Distance [km]',col);
     set(ax,'Position',get(ax,'Position')+[-0.03 0 0.05 0])
     ax.FontSize = 12;
 
@@ -130,13 +127,13 @@ function plot_transect_collage(trans,str_title,str_vari,bathy)
     % Set colorbar parameters for T/S plot
     clear col; if flag_anom; col.map = 'balance'; else; col.map = 'rain'; end
     col.flag_bar = false; % Don't add colorbar
-    [ax,~] = plot_TSplot(trans.ctd.theta0,trans.ctd.salt,trans.ctd.(str_vari.short),xL,yL,trans.vari_cbar(1:2),col);
+    [ax,~] = cv_plot_TSplot(trans.ctd.theta0,trans.ctd.salt,trans.ctd.(str_vari.short),xL,yL,trans.vari_cbar(1:2),col);
     set(ax,'Position',get(ax,'Position')+[0.05 0 0 0])
     ax.FontSize = 12;
 
     % v) Overview map of transect location (see function 'plot_map.m')
     subplot(3,2,2); hold on;
-    [ax,c] = plot_map(trans,str_title,bathy);
+    [ax,c] = cv_plot_map(trans,str_title,bathy);
     set(c,'Position',get(c,'Position')+[0.05 0 0 0])
     set(ax,'Position',get(ax,'Position')+[0.05 0 0 0])
     ax.FontSize = 12;

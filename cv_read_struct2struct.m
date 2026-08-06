@@ -1,4 +1,4 @@
-function ctd = read_struct2struct(data_input,variab_read,variab_write,variab_pres)
+function ctd = cv_read_struct2struct(data_input,variab_read,variab_write,variab_pres)
     % READ_STRUCT2STRUCT Bring collection of CTD profiles from a cruise
     %                    into shape required for CruizeViz processing & plotting 
     %                    if data is currently provided as a MATLAB
@@ -65,7 +65,7 @@ function ctd = read_struct2struct(data_input,variab_read,variab_write,variab_pre
     % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
+    % Last updated: 2026-08-06
 
     % Setup Matlab structure 'data_input'
     data_ini  = data_input;

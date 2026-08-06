@@ -1,4 +1,4 @@
-function ind = station2ind(station,station_str)
+function ind = cv_station2ind(station,station_str)
     % STATION2IND Identify indices of string station names
     % (helper function under utils/)
     %   
@@ -7,13 +7,10 @@ function ind = station2ind(station,station_str)
     %   station_str = 1D cell-array (1xM) with M string station names to find
     % OUTPUT:
     %   ind         = 1D array (1xM) with indices of M stations of interest
-    %
-    % SEE ALSO:
-    %   ...
     % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
+    % Last updated: 2026-08-06
 
 
     ind = NaN(size(station_str));

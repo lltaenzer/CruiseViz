@@ -1,4 +1,4 @@
-function plot_distance_markers(xL,yL,d10)
+function cv_plot_distance_markers(xL,yL,d10)
     % PLOT_DISTANCE_MARKERS Insert markers to 2D area plot to visualize 
     %                       what scales are represented
     % (helper function under utils/)
@@ -14,12 +14,9 @@ function plot_distance_markers(xL,yL,d10)
     % OPTIONAL INPUT:
     %   d10 = length of distance marker [km] (default: 10km)
     %   
-    % SEE ALSO:
-    %   ...
-    % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
+    % Last updated: 2026-08-06
 
     RE  = 6371.000785; % earth radius [km]
     if nargin<3

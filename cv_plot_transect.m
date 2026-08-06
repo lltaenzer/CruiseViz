@@ -1,4 +1,4 @@
-function [ax,c] = plot_transect(dist,pres,VARI,SIGMATHETA,depth,pres_max,dist_ctd,station_str,title_str,xlabel_str,col)
+function [ax,c] = cv_plot_transect(dist,pres,VARI,SIGMATHETA,depth,pres_max,dist_ctd,station_str,title_str,xlabel_str,col)
     % PLOT_TRANSECT Plots CTD transect for first-order analysis aboard the ship
     % (plotting function)
     %
@@ -36,7 +36,7 @@ function [ax,c] = plot_transect(dist,pres,VARI,SIGMATHETA,depth,pres_max,dist_ct
     % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
+    % Last updated: 2026-08-06
 
     colorscheme = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840]};
     % color:            blue                 red                     yellow                purple                  green               light blue               dark red
@@ -88,7 +88,7 @@ function [ax,c] = plot_transect(dist,pres,VARI,SIGMATHETA,depth,pres_max,dist_ct
             scatter(dist_ctd,0*ones(size(dist_ctd)),50,'v','MarkerEdgeColor','k','MarkerFaceColor',colorscheme{2},'MarkerFaceAlpha',.5)
         end
         if  ~isempty(station_str)
-            station_str = station_string(station_str);
+            station_str = cv_station_string(station_str);
             text(dist_ctd,-pres_max/10*ones(size(dist_ctd)),station_str,'HorizontalAlignment','center','FontSize',12,'Color',colorscheme{2})
         end
     end

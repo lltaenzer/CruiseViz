@@ -1,6 +1,6 @@
-function [lat,lon] = bathymetry_guided_connector(lat,lon,bathy,param)
+function [lat,lon] = cv_bathymetry_guided_connector(lat,lon,bathy,param)
     % BATHYMETRY_GUIDED_CONNECTOR Bathymetry-dependent connector between two
-    %                           neighboring transect points
+    %                             neighboring transect points
     % (helper function under utils/)
     %
     % DESCRIPTION:
@@ -38,13 +38,10 @@ function [lat,lon] = bathymetry_guided_connector(lat,lon,bathy,param)
     % OUTPUT:
     %   [lat,lon] = Latitude/Longitude vectors of connector between two
     %               neighboring transect points
-    %   
-    % SEE ALSO:
-    %   design_transect.m
     % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
+    % Last updated: 2026-08-06
 
     RE  = 6371000.785;
 
@@ -66,7 +63,7 @@ function [lat,lon] = bathymetry_guided_connector(lat,lon,bathy,param)
     end
 
     % Divide Euclidean connector into (nb_sub-1) segments
-    dist_start = sum(greatcircledistance(lat,lon));
+    dist_start = sum(cv_greatcircledistance(lat,lon));
     lat = linspace(lat(1),lat(end),nb_sub); lat_start = lat;
     lon = linspace(lon(1),lon(end),nb_sub); lon_start = lon;
     
@@ -82,8 +79,8 @@ function [lat,lon] = bathymetry_guided_connector(lat,lon,bathy,param)
     depth_sel = bathy.depth;
     dist1     = (bathy.LAT-lat(1)).^2 + (bathy.LON-lon(1)).^2 * cosd(lat(1))^2;
     dist2     = (bathy.LAT-lat(end)).^2 + (bathy.LON-lon(end)).^2 * cosd(lat(end))^2;
-    [nx,ny]   = nearestneighbor2D(bathy,lat(1),lon(1),1000);     depth1 = bathy.depth(nx,ny);
-    [nx,ny]   = nearestneighbor2D(bathy,lat(end),lon(end),1000); depth2 = bathy.depth(nx,ny);
+    [nx,ny]   = cv_nearestneighbor2D(bathy,lat(1),lon(1),1000);     depth1 = bathy.depth(nx,ny);
+    [nx,ny]   = cv_nearestneighbor2D(bathy,lat(end),lon(end),1000); depth2 = bathy.depth(nx,ny);
     depth_max = (depth1./dist1 + depth2./dist2)./(1./dist1+1./dist2); % linearly-varying average
                                                                       % depth between start/end stations
     depth_sel = min(depth_sel,depth_max); % choose whatever is shallower
@@ -112,7 +109,7 @@ function [lat,lon] = bathymetry_guided_connector(lat,lon,bathy,param)
         % the vector orthogonal to Euclidean connector between start/end point
         for k=2:length(lat)-1 
             % Identify local gradient surrounding i-th segment point
-            [nx,ny] = nearestneighbor2D(bathy,lat(k),lon(k),1000);
+            [nx,ny] = cv_nearestneighbor2D(bathy,lat(k),lon(k),1000);
             [dhi,dhj] = gradient(depth_sel(nx-1:nx+1,ny-1:ny+1));   dhi = mean(dhi,'all'); dhj = mean(dhj,'all');
             [dloni,dlonj] = gradient(bathy.LON(nx-1:nx+1,ny-1:ny+1)); dloni = mean(dloni,'all'); dlonj = mean(dlonj,'all');
             [dlati,dlatj] = gradient(bathy.LAT(nx-1:nx+1,ny-1:ny+1)); dlati = mean(dlati,'all'); dlatj = mean(dlatj,'all');
@@ -134,7 +131,7 @@ function [lat,lon] = bathymetry_guided_connector(lat,lon,bathy,param)
         lat = lat_new;
         lon = lon_new;
 
-        dist_tot(n) = sum(greatcircledistance(lat,lon)); % Length of new connector
+        dist_tot(n) = sum(cv_greatcircledistance(lat,lon)); % Length of new connector
         if n>Nmin
             ddist = diff(dist_tot(n-Nmin:n));
             if all(abs(ddist)<dist_min) % check if connector length still varies
@@ -145,7 +142,7 @@ function [lat,lon] = bathymetry_guided_connector(lat,lon,bathy,param)
 
     % Check if changed connector length hasn't increased too much,
     % otherwise, go with Euclidean connector instead
-    dist_new = sum(greatcircledistance(lat,lon));
+    dist_new = sum(cv_greatcircledistance(lat,lon));
     if dist_new/dist_start > 1+dist_max
         lat = lat_start;
         lon = lon_start;

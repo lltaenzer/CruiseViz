@@ -1,4 +1,4 @@
-function [nx,ny] = nearestneighbor2D(A,lat,lon,dist_max)
+function [nx,ny] = cv_nearestneighbor2D(A,lat,lon,dist_max)
     % NEARESTNEIGHBOR2D Indices of nearest neighbor of non-equidistant 2D Lat/Lon-field
     % (helper function under utils/)
     %   
@@ -13,13 +13,10 @@ function [nx,ny] = nearestneighbor2D(A,lat,lon,dist_max)
     %              (typically: point out of array range and indices not meaningful)
     % OUTPUT:
     %   [nx,ny] = index locations within 2D array
-    %
-    % SEE ALSO:
-    %   ...
     % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
+    % Last updated: 2026-08-06
 
     dist_squared = (A.LAT-lat).^2 + (A.LON-lon).^2 * cosd(lat)^2;
     [dmin,~]     = min(dist_squared,[],'all');

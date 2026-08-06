@@ -1,4 +1,4 @@
-function ctd = read_cnv2struct(path_load,variab)
+function ctd = cv_read_cnv2struct(path_load,variab)
     % READ_CNV2STRUCT Bring collection of processed CTD profiles from
     %                 Seabird CTD (.cnv-files) into shape required for 
     %                 CruizeViz processing & plotting 
@@ -63,7 +63,7 @@ function ctd = read_cnv2struct(path_load,variab)
     % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
+    % Last updated: 2026-08-06
 
     if ~strcmp(path_load(end),'/')
         path_load = strcat(path_load,'/');
@@ -142,7 +142,7 @@ function ctd = read_cnv2struct(path_load,variab)
 
     % Add fields from data columns to MATLAB structure 'ctd'
     pres_max = max(ind_pres);
-    ctd.pres    = (1:round(pres_max))'; D = length(ctd.pres); dz = median(diff(ctd.pres));
+    ctd.pres    = (1:round(pres_max))'; D = length(ctd.pres); 
     for j=1:length(variab.write)
         ctd.(variab.write{j}) = NaN(D,N);
     end

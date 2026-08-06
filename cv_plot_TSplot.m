@@ -1,4 +1,4 @@
-function [ax,c] = plot_TSplot(theta0,salt,vari,xL,yL,cL,col)
+function [ax,c] = cv_plot_TSplot(theta0,salt,vari,xL,yL,cL,col)
     % PLOT_TSPLOT Plots Potential Temperature-Absolute Salinity plot 
     %             for arrays of interest
     % (plotting function)
@@ -33,7 +33,7 @@ function [ax,c] = plot_TSplot(theta0,salt,vari,xL,yL,cL,col)
     % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
+    % Last updated: 2026-08-06
     
     if nargin<3 || isempty(vari) % should a third variable be plotted
         flag_vari = false; 

@@ -1,4 +1,4 @@
-function trans = design_transect(data,station_str,flag_connect,variab,bathy,flag_extrap,dist0,dx,param_connect)
+function trans = cv_design_transect(data,station_str,flag_connect,variab,bathy,flag_extrap,dist0,dx,param_connect)
     % DESIGN_TRANSECT Interpolate CTD profiles along a 2D transect array
     % (data processing function)
     %
@@ -63,11 +63,11 @@ function trans = design_transect(data,station_str,flag_connect,variab,bathy,flag
     %                    .vari (ZxK) = Interpolated variable along transect
     %   
     % SEE ALSO:
-    %   plot_transect.m
+    %   cv_plot_transect.m
     % 
     % Author: Lukas Taenzer
     % Version: 1.0
-    % Last updated: 2026-07-28
+    % Last updated: 2026-08-06
 
     RE = 6371000.785; % earth radius [m]
 
@@ -91,7 +91,7 @@ function trans = design_transect(data,station_str,flag_connect,variab,bathy,flag
         variab = {variab};
     end
 
-    ind_station = station2ind(data.station,station_str);
+    ind_station = cv_station2ind(data.station,station_str);
     N = length(variab);
 
     % Connection between stations
@@ -112,7 +112,7 @@ function trans = design_transect(data,station_str,flag_connect,variab,bathy,flag
     for j=1:length(ctd_lat)-1
         %if flag_connect(j)*flag_connect(j+1) == 1 % Depth-following connector (if start + end of segment == 1)
         if flag_connect(j) == 1 % i) Bathymetry-guided curved connector
-            [lat_raw,lon_raw] = bathymetry_guided_connector(ctd_lat(j:j+1),ctd_lon(j:j+1),bathy,param_connect);
+            [lat_raw,lon_raw] = cv_bathymetry_guided_connector(ctd_lat(j:j+1),ctd_lon(j:j+1),bathy,param_connect);
         else % ii) Direct great-circle connector
             lat_raw = [ctd_lat(j) ctd_lat(j+1)];
             lon_raw = [ctd_lon(j) ctd_lon(j+1)];
@@ -161,7 +161,7 @@ function trans = design_transect(data,station_str,flag_connect,variab,bathy,flag
     % iii) Create vector of local bathymetry along chosen transect
     if isstruct(bathy)
         for j=1:length(trans.depth)
-            [nx,ny] = nearestneighbor2D(bathy,trans.lat(j),trans.lon(j),1000);
+            [nx,ny] = cv_nearestneighbor2D(bathy,trans.lat(j),trans.lon(j),1000);
             if isnan(bathy.depth(nx,ny))
                 trans.depth(j) = 0;
             else
