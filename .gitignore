@@ -1,0 +1,6 @@
+# MATLAB temporary files
+*.asv
+*.m~
+
+# Operating system files
+.DS_Store
