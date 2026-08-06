@@ -4,7 +4,7 @@ Version: 1.0
 Release date: 2026-08-06
 Author: Lukas Taenzer (Stockholm University)
 License: MIT 
-Written in:	MATLAB R2025b
+Written in: MATLAB R2025b
 
 DESCRIPTION
 CruiseViz is a MATLAB toolbox for rapid visualization and first-order analysis
@@ -42,8 +42,8 @@ DEPENDENCIES
 	- Selection of GSW TEOS-10 functions by McDougall & Barker (2011) - included
 	- cmocean colormaps by Thyng et al. (2016) - included
 
-DOCUMENTATION
-See "Tutorial_CruiseViz" (either .mlx or .html) for first guidance of functions 
+TUTORIAL
+See "tutorial/Tutorial_CruiseViz" (either .mlx or .html) for first guidance of functions 
 (reading and plotting) and possible user parameter choices. For a complete view
 of functionality, see documentation of individual functions. 
 
