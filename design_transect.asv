@@ -1,0 +1,240 @@
+function trans = design_transect(data,station_str,flag_connect,variab,bathy,flag_extrap,dist0,dx,param_connect)
+    % DESIGN_TRANSECT Interpolate CTD profiles along a 2D transect array
+    % (data processing function)
+    %
+    % DESCRIPTION:
+    %   Identify (bathymetry-guided) transect and interpolate variables of interest
+    %   along transect length vector; designed for connecting sample points in 
+    %   complex bathymetry environments
+    %   
+    % INPUT:
+    %   data         = Matlab structure containing CTD data (M profiles on same 
+    %                  pressure grid with Z steps) with the following fields 
+    %                  (at least), organized as:
+    %                       data.station (1xM) - 1D cell array of string
+    %                                            station names
+    %                       data.lon     (1xM) - Longitude vector [degE]
+    %                       data.lat     (1xM) - Latitude vector [degN]
+    %                       data.pres    (Zx1) - Pressure vector
+    %                       data.vari    (ZxM) - Array containing profiles of 
+    %                                            variable of interest
+    %                                            (e.g., theta0, salt, sigmatheta, 
+    %                                                   oxy, turb, fluor, ...)
+    %   station_str  = List of string station names within transect 
+    %                  (found in 'data.station')
+    %   flag_connect = User-flag scaler/vector to determine type of transect 
+    %                  connection between two neighboring stations 
+    %                       0 = Direct/Euclidean connector
+    %                       1 = Curved bathymetry-following connector
+    %                           (see 'bathymetry_guided_connector.m')
+    %                   - if scalar: apply flag to all transect legs
+    %                   - if vector: apply to individual transect leg 
+    %                                (length = M-1 transect legs)
+    %   variab       = List of variable strings to be interpolated along transect
+    %                  (1D (1xM) cell array of M variable names found in 'data')
+    %   bathy        = Matlab structure containing bathymetry data with fields:
+    %                       bathy.LON   = 2D Longitude array [degE]
+    %                       bathy.LAT   = 2D Latitude array [degE]
+    %                       bathy.depth = 2D ocean depth array [m]
+    %   flag_extrap   = User-flag: Bathymetry-restricted extrapolation of
+    %                              data along the transect to fill basins
+    %        
+    % OPTIONAL INPUT:
+    %   dist0         = Zero-mark of transect distance vector (default: 0 m)
+    %   dx            = Resolution of transect pathway (default: 250 m) 
+    %   param_connect = Matlab structure of tuning parameters for bathymetry-guided 
+    %                   transect design; for more details, 
+    %                   see 'bathymetry_guided_connector.m' (default: 1)
+    %
+    % OUTPUT:
+    %   trans = Matlab structure of interpolated transect, containing positions and
+    %           interpolated fields required for plotting
+    %               trans.ctd.dist (1xM) = CTD-locations along distance vector [km]
+    %                        .lat  (1xM) = CTD Latitude [degN]
+    %                        .lon  (1xM) = CTD Longitude [degE]
+    %                        .station (1xM) = 1D cell array with CTD station names
+    %                        .vari (ZxM) = 2D double array of data from CTD
+    %                                      stations along selected transect
+    %               trans.dist (1xK) = Interpolated transect distance vector [km]
+    %                    .lat  (1xK) = Latitude of interpolated transect vector
+    %                    .lon  (1xK) = Longitude of interpolated transect vector
+    %                    .pres (Zx1) = Pressure vector
+    %                    .depth(1xK) = Ocean depth along interpolated transect [m]
+    %                    .vari (ZxK) = Interpolated variable along transect
+    %   
+    % SEE ALSO:
+    %   plot_transect.m
+    % 
+    % Author: Lukas Taenzer
+    % Version: 1.0
+    % Last updated: 2026-07-28
+
+    RE = 6371000.785; % earth radius [m]
+
+    if nargin<6 || ~isstruct(bathy) % no extrapolation if no bathymetry-data provided
+        flag_extrap = false;
+    end
+    if nargin<7 || isempty(dist0)
+        dist0 = 0;
+    end
+    if nargin<8 || isempty(dx)
+        dx = 250/1000; % resolution of distance vector [km]
+    else
+        dx = dx/1000;
+    end
+
+    if nargin<9 || isempty(param_connect) 
+        param_connect = 1;
+    end
+
+    if ischar(variab) || isstring(variab) % write single variable in cell array
+        variab = {variab};
+    end
+
+    ind_station = station2ind(data.station,station_str);
+    N = length(variab);
+
+    % Connection between stations
+    ctd_lat  = data.lat(:,ind_station);
+    ctd_lon  = data.lon(:,ind_station);
+    ctd_dist = zeros(size(ctd_lat));
+
+    if (isscalar(flag_connect)) % if same interpolation scheme shall be employed everywhere
+        if flag_connect==1
+            flag_connect = ones(1,length(ctd_lat)-1); % always use depth-following connector
+        else
+            flag_connect = zeros(1,length(ctd_lat)-1); % always use direct great-circle connector
+        end
+    end
+
+    % Determine transect position vector (lon_full,lat_full)
+    lon_full = ctd_lon(1); lat_full = ctd_lat(1);
+    for j=1:length(ctd_lat)-1
+        %if flag_connect(j)*flag_connect(j+1) == 1 % Depth-following connector (if start + end of segment == 1)
+        if flag_connect(j) == 1 % i) Bathymetry-guided curved connector
+            [lat_raw,lon_raw] = bathymetry_guided_connector(ctd_lat(j:j+1),ctd_lon(j:j+1),bathy,param_connect);
+        else % ii) Direct great-circle connector
+            lat_raw = [ctd_lat(j) ctd_lat(j+1)];
+            lon_raw = [ctd_lon(j) ctd_lon(j+1)];
+        end
+
+        % Determine length of each transect segment between CTD points
+        gcd = RE * acos(sind(lat_raw(1:end-1)).*sind(lat_raw(2:end))+...
+                        cosd(lat_raw(1:end-1)).*cosd(lat_raw(2:end)).*cosd(lon_raw(2:end)-lon_raw(1:end-1)));
+        ctd_dist(j+1) = ctd_dist(j)+sum(gcd);
+        
+        lon_full = cat(2,lon_full,lon_raw(2:end)); % full lat/lon
+        lat_full = cat(2,lat_full,lat_raw(2:end));
+    end
+    ctd_dist = ctd_dist/1000; % from [m] to [km]
+
+    % Fill output Matlab structure 'trans':
+    % i) Save original input data, incl. its position on new transect distance vector
+    trans.ctd.dist = ctd_dist;
+    trans.ctd.lat  = ctd_lat;
+    trans.ctd.lon  = ctd_lon;
+    trans.ctd.station = station_str;
+
+    % ii) New equidistant interpolated transect vector 
+    gcd = RE * acos(sind(lat_full(1:end-1)).*sind(lat_full(2:end))+...
+                        cosd(lat_full(1:end-1)).*cosd(lat_full(2:end)).*cosd(lon_full(2:end)-lon_full(1:end-1)));
+    dist_full = [0 cumsum(gcd)]/1000;
+
+    % Interpolation of lat/lon transect onto an equidistant vector
+    dist_full(end)= ceil(dist_full(end)/dx)*dx;
+    trans.dist    = 0:dx:dist_full(end);
+    trans.lat     = interp1(dist_full,lat_full,trans.dist);
+    trans.lon     = interp1(dist_full,lon_full,trans.dist);
+    trans.pres    = data.pres;
+    trans.depth   = NaN(size(trans.dist));
+
+    % Reset "zero" on distance vector (e.g., to place zero at sill location)
+    trans.dist = trans.dist - dist0;
+    trans.ctd.dist = trans.ctd.dist - dist0;
+
+    [CTD_DIST,CTD_PRES] = meshgrid(ctd_dist,data.pres);
+    [DIST,PRES] = meshgrid(trans.dist,trans.pres);
+    if flag_extrap
+        mask_bathy = zeros(size(DIST));
+    end
+
+    % iii) Create vector of local bathymetry along chosen transect
+    if isstruct(bathy)
+        for j=1:length(trans.depth)
+            [nx,ny] = nearestneighbor2D(bathy,trans.lat(j),trans.lon(j),1000);
+            if isnan(bathy.depth(nx,ny))
+                trans.depth(j) = 0;
+            else
+                trans.depth(j) = bathy.depth(nx,ny);
+            end
+
+            if flag_extrap % don't extrapolate into land areas
+                mask_bathy(trans.pres>trans.depth(j)-10,j) = 1; % "1" where land
+            end
+        end
+    end
+
+    % iv) Fill 'trans' structure with (interpolated) variable fields
+    %     (incl. bathymetry-restricted extrapolation if flag_extrap = true)
+    for n=1:N
+        temp_raw = data.(variab{n})(:,ind_station);
+        if strcmp(variab{n},'turb') % if turbidity is chosen, smooth data with moving-mean
+            temp_raw = movmean(temp_raw,10,'omitnan');
+        end
+
+        temp = temp_raw(:);
+        x = CTD_DIST(:);
+        y = CTD_PRES(:);
+
+        % a) Interpolation: Core data range
+        if n<N
+            trans.(variab{n}) = griddata(x,y,temp,DIST,PRES);
+            trans.ctd.(variab{n}) = temp_raw;
+        else
+            trans.vari = griddata(x,y,temp,DIST,PRES);
+            trans.ctd.vari = temp_raw;
+        end
+
+        % b) Extrapolation (if flag = true): Bathymetry-restricted
+        %    extrapolation to fill deep basins, assuming that i) basin
+        %    conditions remain homogeneous around neighboring stations and
+        %    ii) information can't spread horizontally across bathymetry of transect
+        %    projection
+        if flag_extrap
+            % Ensure that original CTD location maps onto distance vector
+            for j=1:length(trans.ctd.lat)
+                [~,ind_min] = min(abs(trans.dist-trans.ctd.dist(j)));
+                if n<N
+                    trans.(variab{n})(:,ind_min) = trans.ctd.(variab{n})(:,j);
+                else
+                    trans.vari(:,ind_min) = trans.ctd.vari(:,j);
+                end
+            end
+
+            % Perform extrapolation for each depth layer individually
+            for z=1:length(trans.pres)
+                ind_bathy  = mask_bathy(z,:);
+
+                % Identify basins separated by bathymetry at z-th depth level
+                d = diff([1 ind_bathy 1]); 
+                startIdx = find(d == -1);
+                endIdx   = find(d == 1) - 1;
+                basins   = [startIdx(:), endIdx(:)];
+                basins(:,1) = basins(:,1)-1; basins(basins<1) = 1;
+                basins(:,2) = basins(:,2)+1; basins(basins>length(trans.dist)) = length(trans.dist);
+                
+                % Extrapolate within each basin with nearest-neighbor values
+                for b=1:length(basins(:,1))
+                    if n<N
+                        data_basin = trans.(variab{n})(z,basins(b,1):basins(b,2));
+                        trans.(variab{n})(z,basins(b,1):basins(b,2)) = fillmissing(data_basin,'linear','EndValues','nearest');
+                    else
+                        data_basin = trans.vari(z,basins(b,1):basins(b,2));
+                        trans.vari(z,basins(b,1):basins(b,2)) = fillmissing(data_basin,'linear','EndValues','nearest');
+                    end
+                end
+            end
+        end % End flag_extrap
+
+    end % End loop through variables (inter- and extrapolation)
+end
