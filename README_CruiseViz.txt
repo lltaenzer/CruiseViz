@@ -50,4 +50,4 @@ of functionality, see documentation of individual functions.
 CONTACT
 Lukas Taenzer (Stockholm University)
 Email: lukas.taenzer@geo.su.se
-GitHub: 
+GitHub: https://github.com/lltaenzer/CruiseViz
