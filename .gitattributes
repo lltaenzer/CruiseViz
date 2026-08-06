@@ -1,0 +1,5 @@
+# Ignore tutorial output in GitHub language statistics
+tutorials/*.html linguist-generated=true
+
+# Ignore external libraries
+third_party/* linguist-vendored=true
