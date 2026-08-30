@@ -24,9 +24,7 @@ function ctd = cv_read_cnv2struct(path_load,variab)
     %                   - variab.write   = 1D cell array with strings of profile
     %                                      variable as it should appear in the
     %                                      output file; the array should at least 
-    %                                      contain the following variables
-    %                                      to ensure that other CruizeViz
-    %                                      functions execute correctly:
+    %                                      contain the following variables:
     %                                       - 'temp'    = In-situ temperature 
     %                                       - 'sali'    = Practical salinity
     %                   - variab.loc     = 1D vector assigning each variable in 
